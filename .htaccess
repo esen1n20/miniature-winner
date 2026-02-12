@@ -1,0 +1,190 @@
+# Настройка Apache для чистых URL и SEO
+
+# Включить mod_rewrite
+RewriteEngine On
+RewriteBase /
+
+# ===================================
+# 1. HTTPS и WWW редиректы
+# ===================================
+
+# Редирект с HTTP на HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Редирект с www на без www
+RewriteCond %{HTTP_HOST} ^www\.platinovskaya\.fit [NC]
+RewriteRule ^(.*)$ https://platinovskaya.fit/$1 [R=301,L]
+
+# ===================================
+# 2. Редирект index.html → главная /
+# ===================================
+
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.html[\s?] [NC]
+RewriteRule ^index\.html$ / [R=301,L]
+
+# ===================================
+# 3. Удаление .html из URL
+# ===================================
+
+# Редирект со старых URL с .html на чистые URL
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/([^.]+)\.html[\s?] [NC]
+RewriteRule ^(.+)\.html$ /$1/ [R=301,L]
+
+# Если запрашивается URL без .html — внутренне отдать .html файл
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]
+
+# ===================================
+# 4. Добавление слэша в конец
+# ===================================
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !(.*)/$
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{1,5}$
+RewriteRule ^(.*)$ /$1/ [L,R=301]
+
+# ===================================
+# 5. Редиректы со старой структуры
+# ===================================
+
+# Курсы
+RedirectMatch 301 ^/light-start\.html$ /courses/legkiy-start-dlya-nachinayushchikh/
+RedirectMatch 301 ^/online-consultation\.html$ /courses/onlayn-konsultatsiya-fitnes/
+RedirectMatch 301 ^/personal-trainings\.html$ /courses/personalnye-trenirovki/
+RedirectMatch 301 ^/yagoditsy-press\.html$ /courses/yagoditsy-i-press/
+RedirectMatch 301 ^/smoothie-detox\.html$ /courses/smuzi-detoks/
+RedirectMatch 301 ^/check-up\.html$ /courses/check-up-organizma/
+RedirectMatch 301 ^/ideal-body\.html$ /courses/idealnoye-telo/
+RedirectMatch 301 ^/antioffice\.html$ /courses/anti-ofis/
+RedirectMatch 301 ^/nutrition-accompaniment\.html$ /courses/soprovozhdenie-po-pitaniyu/
+RedirectMatch 301 ^/webinars\.html$ /courses/vebinary/
+
+# Основные разделы
+RedirectMatch 301 ^/about\.html$ /about/
+RedirectMatch 301 ^/contacts\.html$ /contacts/
+RedirectMatch 301 ^/cases\.html$ /cases/
+RedirectMatch 301 ^/blog\.html$ /blog/
+RedirectMatch 301 ^/useful\.html$ /useful/
+RedirectMatch 301 ^/certificates\.html$ /certificates/
+
+# Политики
+RedirectMatch 301 ^/privacy-policy\.html$ /privacy-policy/
+RedirectMatch 301 ^/personal-data-policy\.html$ /personal-data-policy/
+RedirectMatch 301 ^/terms-of-service\.html$ /terms-of-service/
+RedirectMatch 301 ^/consent-personal-data\.html$ /consent-personal-data/
+RedirectMatch 301 ^/payment\.html$ /payment/
+
+# ===================================
+# 6. Маршруты для курсов
+# ===================================
+
+RewriteRule ^courses/legkiy-start-dlya-nachinayushchikh/?$ /light-start.html [L]
+RewriteRule ^courses/onlayn-konsultatsiya-fitnes/?$ /online-consultation.html [L]
+RewriteRule ^courses/personalnye-trenirovki/?$ /personal-trainings.html [L]
+RewriteRule ^courses/yagoditsy-i-press/?$ /yagoditsy-press.html [L]
+RewriteRule ^courses/smuzi-detoks/?$ /smoothie-detox.html [L]
+RewriteRule ^courses/check-up-organizma/?$ /check-up.html [L]
+RewriteRule ^courses/idealnoye-telo/?$ /ideal-body.html [L]
+RewriteRule ^courses/anti-ofis/?$ /antioffice.html [L]
+RewriteRule ^courses/soprovozhdenie-po-pitaniyu/?$ /nutrition-accompaniment.html [L]
+RewriteRule ^courses/vebinary/?$ /webinars.html [L]
+
+# Главная страница курсов
+RewriteRule ^courses/?$ /index.html#courses [L]
+
+# ===================================
+# 7. Маршруты для остальных разделов
+# ===================================
+
+RewriteRule ^cases/?$ /cases.html [L]
+RewriteRule ^blog/?$ /blog.html [L]
+RewriteRule ^about/?$ /about.html [L]
+RewriteRule ^contacts/?$ /contacts.html [L]
+RewriteRule ^useful/?$ /useful.html [L]
+RewriteRule ^certificates/?$ /certificates.html [L]
+RewriteRule ^payment/?$ /payment.html [L]
+RewriteRule ^consent-personal-data/?$ /consent-personal-data.html [L]
+RewriteRule ^privacy-policy/?$ /privacy-policy.html [L]
+RewriteRule ^personal-data-policy/?$ /personal-data-policy.html [L]
+RewriteRule ^terms-of-service/?$ /terms-of-service.html [L]
+
+# ===================================
+# 8. Защита файлов и папок
+# ===================================
+
+<FilesMatch "(^\.htaccess|^\.git|composer\.json|package\.json|gulpfile\.js)">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ===================================
+# 9. Кэширование
+# ===================================
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# ===================================
+# 10. Сжатие GZIP
+# ===================================
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ===================================
+# 11. Безопасность
+# ===================================
+
+Options -Indexes
+
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ===================================
+# 12. Страницы ошибок
+# ===================================
+
+ErrorDocument 404 /404.html
+ErrorDocument 403 /403.html
+ErrorDocument 500 /500.html
